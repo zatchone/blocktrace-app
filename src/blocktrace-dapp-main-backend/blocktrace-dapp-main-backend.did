@@ -1,0 +1,20 @@
+type Step = record {
+  product_id: text;
+  actor_name: text;
+  role: text;
+  action: text;
+  location: text;
+  notes: opt text;
+  timestamp: nat64;
+};
+
+type AddStepResult = variant {
+  Ok: text;
+  Err: text;
+};
+
+service : {
+  add_step: (Step) -> (AddStepResult);
+  get_product_history: (text) -> (vec Step) query;
+  get_all_products: () -> (vec text) query;
+}
