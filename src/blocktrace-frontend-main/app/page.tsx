@@ -26,6 +26,7 @@ const LandingPage = () => {
   const handlePlugWalletLogin = async () => {
     await loginWithPlugWallet();
   };
+
   const steps = [
     {
       number: 1,
@@ -62,10 +63,7 @@ const LandingPage = () => {
           className="w-full h-full object-cover opacity-30"
           onLoadedData={() => setIsVideoLoaded(true)}
         >
-          {/* Replace with your video URL - try these cool options: */}
-          {/* Pixabay: https://pixabay.com/videos/search/technology/ */}
-          {/* Pexels: https://www.pexels.com/videos/search/abstract/ */}
-          <source src="/assets/vid2.mp4" type="video/mp4" />
+          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
         </video>
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-purple-900/20 to-blue-900/40"></div>
@@ -220,7 +218,7 @@ const LandingPage = () => {
       <footer className="relative z-10 py-8 px-6 lg:px-8 border-t border-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-500 text-sm">
           <p>Secure authentication powered by Internet Computer Protocol</p>
-          <p className="mt-2">© 2025 BlockTrace. Building transparent supply chains.      Made with 💜 by YASHASVI SHARMA</p>
+          <p className="mt-2">© 2025 BlockTrace. Building transparent supply chains. Made with 💜 by YASHASVI SHARMA.</p>
         </div>
       </footer>
     </div>
