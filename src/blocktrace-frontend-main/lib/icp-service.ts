@@ -2,32 +2,30 @@
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
-// Define the Candid interface
-export interface Step {
+// Define the Candid interface types
+export type Step = {
   product_id: string;
   actor_name: string;
   role: string;
   action: string;
   location: string;
-  notes: [] | [string]; // Candid opt type
+  notes: [] | [string];
   timestamp: bigint;
-}
+};
 
-export interface AddStepResult {
+export type AddStepResult = {
   Ok?: string;
   Err?: string;
-}
+};
 
-// Define the service interface
-export interface BlockTraceService {
+type BlockTraceService = {
   add_step: (step: Step) => Promise<AddStepResult>;
   get_product_history: (productId: string) => Promise<Step[]>;
   get_all_products: () => Promise<string[]>;
   get_total_steps_count: () => Promise<bigint>;
   get_canister_info: () => Promise<string>;
-}
+};
 
-// IDL Factory (generated from your .did file)
 export const idlFactory = ({ IDL }: any) => {
   const Step = IDL.Record({
     'product_id': IDL.Text,
@@ -53,7 +51,7 @@ export const idlFactory = ({ IDL }: any) => {
   });
 };
 
-export class ICPService {
+class ICPService {
   private agent: HttpAgent | null = null;
   private actor: BlockTraceService | null = null;
   private canisterId: string;
@@ -61,108 +59,72 @@ export class ICPService {
   private isConnected: boolean = false;
 
   constructor() {
-    // Determine environment and set appropriate values
-    const isDevelopment = typeof window !== 'undefined' && 
-                         (window.location.hostname === 'localhost' || 
-                          window.location.hostname === '127.0.0.1');
+    // Force local development settings
+    this.canisterId = this.getCanisterId();
+    this.host = "http://127.0.0.1:8081"; // Force local host
     
-    // Use environment variables or fallback to defaults
-    this.canisterId = process.env.NEXT_PUBLIC_CANISTER_ID || 
-                     (isDevelopment ? "rdmx6-jaaaa-aaaaa-aaadq-cai" : "uxrrr-q7777-77774-qaaaq-cai");
-    
-    this.host = process.env.NEXT_PUBLIC_ICP_HOST || 
-               (isDevelopment ? "http://localhost:4943" : "https://ic0.app");
-    
-    console.log(`ICP Service initialized:`, {
-      canisterId: this.canisterId,
-      host: this.host,
-      environment: isDevelopment ? 'development' : 'production'
-    });
+    console.log(`ICP Service initialized - Host: ${this.host}, Canister ID: ${this.canisterId}`);
+  }
+
+  private getCanisterId(): string {
+    // Try different environment variable names
+    const canisterIdSources = [
+      process.env.NEXT_PUBLIC_CANISTER_ID_BLOCKTRACE_BACKEND,
+      process.env.NEXT_PUBLIC_CANISTER_ID,
+      process.env.CANISTER_ID_BLOCKTRACE_BACKEND,
+      process.env.CANISTER_ID,
+      "uxrrr-q7777-77774-qaaaq-cai" // Your actual canister ID as fallback
+    ];
+
+    for (const canisterId of canisterIdSources) {
+      if (canisterId && canisterId.trim()) {
+        return canisterId.trim();
+      }
+    }
+
+    // Use the actual canister ID from your canister_ids.json
+    return "uxrrr-q7777-77774-qaaaq-cai";
   }
 
   async connect(): Promise<boolean> {
     try {
-      console.log(`Attempting to connect to ICP...`, {
-        canisterId: this.canisterId,
+      console.log(`Connecting to ICP at ${this.host} with canister ${this.canisterId}`);
+      
+      this.agent = new HttpAgent({ 
         host: this.host
       });
 
-      // Create HTTP agent
-      this.agent = new HttpAgent({
-        host: this.host
-      });
+      // Always fetch root key for local development
+      console.log("Fetching root key for local development...");
+      await this.agent.fetchRootKey();
 
-      // Fetch root key for local development
-      if (this.host.includes('localhost') || this.host.includes('127.0.0.1')) {
-        console.log('Fetching root key for local development...');
-        try {
-          await this.agent.fetchRootKey();
-          console.log('Root key fetched successfully');
-        } catch (rootKeyError) {
-          console.error('Failed to fetch root key:', rootKeyError);
-          throw new Error('Local dfx replica not running. Please start with: dfx start');
-        }
-      }
-
-      // Create actor
       this.actor = Actor.createActor(idlFactory, {
         agent: this.agent,
         canisterId: this.canisterId,
       }) as BlockTraceService;
 
       // Test connection with a simple query
-      console.log('Testing connection with canister...');
+      console.log("Testing connection with get_canister_info...");
       const info = await this.actor.get_canister_info();
-      console.log('Connection test successful:', info);
+      console.log("Connection successful! Canister info:", info);
       
       this.isConnected = true;
-      console.log("Successfully connected to ICP canister:", this.canisterId);
       return true;
     } catch (error) {
-      console.error("Failed to connect to ICP:", error);
+      console.error("ICP connection error:", error);
+      this.isConnected = false;
       
-      // Provide helpful error messages
-      if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error &&
-        typeof (error as any).message === "string" &&
-        (error as any).message.includes('canister_not_found')
-      ) {
-        console.error(`
-❌ Canister not found!
-   
-Possible solutions:
-1. If developing locally:
-   - Make sure dfx is running: dfx start
-   - Deploy your canister: dfx deploy
-   - Check canister ID: dfx canister id your_canister_name
-   
-2. If using mainnet:
-   - Deploy to mainnet: dfx deploy --network ic
-   - Get mainnet canister ID: dfx canister id your_canister_name --network ic
-   - Update NEXT_PUBLIC_CANISTER_ID in your environment
-
-Current config:
-- Canister ID: ${this.canisterId}
-- Host: ${this.host}
-        `);
-      } else if (
-        typeof error === "object" &&
-        error !== null &&
-        "message" in error &&
-        typeof (error as any).message === "string" &&
-        (error as any).message.includes('Connection refused')
-      ) {
-        console.error(`
-❌ Connection refused!
-   
-This usually means the local dfx replica is not running.
-Please start it with: dfx start
-        `);
+      // Provide more specific error messages
+      if (error instanceof Error) {
+        if (error.message.includes('canister_not_found')) {
+          console.error(`Canister ${this.canisterId} not found. Please deploy it first: dfx deploy blocktrace_backend`);
+        } else if (error.message.includes('fetch') || error.message.includes('network')) {
+          console.error("Network error - make sure dfx is running: dfx start --background");
+        } else if (error.message.includes('subnet')) {
+          console.error("Subnet error - try restarting dfx: dfx stop && dfx start --background --clean");
+        }
       }
       
-      this.isConnected = false;
       return false;
     }
   }
@@ -171,12 +133,12 @@ Please start it with: dfx start
     if (!this.isConnected || !this.actor) {
       const connected = await this.connect();
       if (!connected) {
-        throw new Error("Failed to connect to ICP network");
+        throw new Error(`Failed to connect to ICP network. Canister ${this.canisterId} may not be deployed. Run: dfx deploy blocktrace_backend`);
       }
     }
   }
 
-  async addStep(stepData: {
+  async addStep(data: {
     product_id: string;
     actor_name: string;
     role: string;
@@ -186,96 +148,61 @@ Please start it with: dfx start
   }): Promise<AddStepResult> {
     await this.ensureConnected();
     
-    try {
-      const step: Step = {
-        product_id: stepData.product_id,
-        actor_name: stepData.actor_name,
-        role: stepData.role,
-        action: stepData.action,
-        location: stepData.location,
-        notes: stepData.notes ? [stepData.notes] : [], // Convert to Candid opt type
-        timestamp: BigInt(0) // Will be set by canister
-      };
-
-      console.log("Calling add_step with:", step);
-      const result = await this.actor!.add_step(step);
-      console.log("add_step result:", result);
-      return result;
-    } catch (error) {
-      console.error("Error adding step:", error);
-      return { Err: `Failed to add step: ${error}` };
-    }
+    const step: Step = {
+      product_id: data.product_id,
+      actor_name: data.actor_name,
+      role: data.role,
+      action: data.action,
+      location: data.location,
+      notes: data.notes ? [data.notes] : [],
+      timestamp: BigInt(0), // Backend will set this
+    };
+    
+    console.log("Sending step to backend:", step);
+    const result = await this.actor!.add_step(step);
+    console.log("Backend response:", result);
+    return result;
   }
 
   async getAllProducts(): Promise<string[]> {
     await this.ensureConnected();
-    
-    try {
-      console.log("Calling get_all_products...");
-      const products = await this.actor!.get_all_products();
-      console.log("get_all_products result:", products);
-      return products;
-    } catch (error) {
-      console.error("Error getting products:", error);
-      return [];
-    }
+    return await this.actor!.get_all_products();
   }
 
   async getProductHistory(productId: string): Promise<Step[]> {
     await this.ensureConnected();
-    
-    try {
-      console.log("Calling get_product_history with:", productId);
-      const history = await this.actor!.get_product_history(productId);
-      console.log("get_product_history result:", history);
-      return history;
-    } catch (error) {
-      console.error("Error getting product history:", error);
-      return [];
-    }
+    return await this.actor!.get_product_history(productId);
   }
 
   async getTotalStepsCount(): Promise<bigint> {
     await this.ensureConnected();
-    
-    try {
-      console.log("Calling get_total_steps_count...");
-      const count = await this.actor!.get_total_steps_count();
-      console.log("get_total_steps_count result:", count);
-      return count;
-    } catch (error) {
-      console.error("Error getting total steps count:", error);
-      return BigInt(0);
-    }
+    return await this.actor!.get_total_steps_count();
   }
 
   async getCanisterInfo(): Promise<string> {
     await this.ensureConnected();
-    
-    try {
-      console.log("Calling get_canister_info...");
-      const info = await this.actor!.get_canister_info();
-      console.log("get_canister_info result:", info);
-      return info;
-    } catch (error) {
-      console.error("Error getting canister info:", error);
-      return "Error getting canister info";
-    }
+    return await this.actor!.get_canister_info();
   }
 
-  // Helper method to check connection status
   isConnectedToICP(): boolean {
     return this.isConnected && this.actor !== null;
   }
 
-  // Method to disconnect
   disconnect(): void {
     this.agent = null;
     this.actor = null;
     this.isConnected = false;
-    console.log("Disconnected from ICP canister");
+    console.log("Disconnected from ICP");
+  }
+
+  // Utility method to get connection status
+  getConnectionStatus(): { isConnected: boolean; canisterId: string; host: string } {
+    return {
+      isConnected: this.isConnected,
+      canisterId: this.canisterId,
+      host: this.host
+    };
   }
 }
 
-// Create a singleton instance
 export const icpService = new ICPService();

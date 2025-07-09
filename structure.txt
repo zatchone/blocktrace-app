@@ -1,0 +1,161 @@
+.
+├── .DS_Store
+├── .env
+├── .gitignore
+├── Cargo.lock
+├── Cargo.toml
+├── dfx.json
+├── package-lock.json
+├── package.json
+├── README.md
+├── src
+│   ├── .DS_Store
+│   ├── blocktrace-dapp-main-backend
+│   │   ├── blocktrace-dapp-main-backend.did
+│   │   ├── Cargo.toml
+│   │   └── src
+│   │       └── lib.rs
+│   ├── blocktrace-frontend-main
+│   │   ├── .DS_Store
+│   │   ├── .env.local
+│   │   ├── .gitignore
+│   │   ├── app
+│   │   │   ├── add-step
+│   │   │   │   └── page.tsx
+│   │   │   ├── globals.css
+│   │   │   ├── home
+│   │   │   │   └── page.tsx
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx
+│   │   │   ├── pagecopy.tsx
+│   │   │   └── track
+│   │   │       └── page.tsx
+│   │   ├── components
+│   │   │   ├── footer.tsx
+│   │   │   ├── Hero.tsx
+│   │   │   ├── ICPDashboard.tsx
+│   │   │   ├── LandingPage.tsx
+│   │   │   ├── TrackPage.tsx
+│   │   │   └── ui
+│   │   │       ├── background-beams-with-collision.tsx
+│   │   │       └── evervault-card.tsx
+│   │   ├── eslint.config.mjs
+│   │   ├── hooks
+│   │   │   └── useICP.ts
+│   │   ├── lib
+│   │   │   ├── auth.ts
+│   │   │   ├── icp-service.ts
+│   │   │   ├── useAuth.ts
+│   │   │   └── utils.ts
+│   │   ├── middleware.ts
+│   │   ├── next-env.d.ts
+│   │   ├── next.config.ts
+│   │   ├── out
+│   │   │   ├── _next
+│   │   │   │   ├── pTya5rwA5h07wK8B0uEbk
+│   │   │   │   └── static
+│   │   │   │       ├── chunks
+│   │   │   │       │   ├── 315-4b27ab7f7393f00c.js
+│   │   │   │       │   ├── 594-b676a6c9a195b037.js
+│   │   │   │       │   ├── 649-38fd7fa4a2be8452.js
+│   │   │   │       │   ├── 87c73c54-23c130a50120d1b4.js
+│   │   │   │       │   ├── 886-22e6d6225ef30aaa.js
+│   │   │   │       │   ├── app
+│   │   │   │       │   │   ├── _not-found
+│   │   │   │       │   │   │   └── page-497730cfbd10105f.js
+│   │   │   │       │   │   ├── add-step
+│   │   │   │       │   │   │   └── page-40f47c8b5efcab41.js
+│   │   │   │       │   │   ├── home
+│   │   │   │       │   │   │   └── page-61d13530380b7548.js
+│   │   │   │       │   │   ├── layout-1fe7adcf9785d9ef.js
+│   │   │   │       │   │   ├── page-a66fbcac6370e57e.js
+│   │   │   │       │   │   └── track
+│   │   │   │       │   │       └── page-7690a66430665098.js
+│   │   │   │       │   ├── framework-0d67a39aba503303.js
+│   │   │   │       │   ├── main-133b81aed681fd53.js
+│   │   │   │       │   ├── main-app-91aad614d5b3efc2.js
+│   │   │   │       │   ├── pages
+│   │   │   │       │   │   ├── _app-a48f070af90c9683.js
+│   │   │   │       │   │   └── _error-b8c2e08355edc3b4.js
+│   │   │   │       │   ├── polyfills-42372ed130431b0a.js
+│   │   │   │       │   └── webpack-12d9008c18309e08.js
+│   │   │   │       ├── css
+│   │   │   │       │   └── 62c82b9d3881ee15.css
+│   │   │   │       ├── media
+│   │   │   │       │   ├── 569ce4b8f30dc480-s.p.woff2
+│   │   │   │       │   ├── 747892c23ea88013-s.woff2
+│   │   │   │       │   ├── 8d697b304b401681-s.woff2
+│   │   │   │       │   ├── 93f479601ee12b01-s.p.woff2
+│   │   │   │       │   ├── 9610d9e46709d722-s.woff2
+│   │   │   │       │   └── ba015fad6dcf6784-s.woff2
+│   │   │   │       └── pTya5rwA5h07wK8B0uEbk
+│   │   │   │           ├── _buildManifest.js
+│   │   │   │           └── _ssgManifest.js
+│   │   │   ├── .DS_Store
+│   │   │   ├── 404
+│   │   │   │   └── index.html
+│   │   │   ├── 404.html
+│   │   │   ├── add-step
+│   │   │   │   ├── index.html
+│   │   │   │   └── index.txt
+│   │   │   ├── assets
+│   │   │   │   ├── background.jpg
+│   │   │   │   ├── logo.svg
+│   │   │   │   ├── vid.mp4
+│   │   │   │   └── vid2.mp4
+│   │   │   ├── file.svg
+│   │   │   ├── globe.svg
+│   │   │   ├── home
+│   │   │   │   ├── index.html
+│   │   │   │   └── index.txt
+│   │   │   ├── index.html
+│   │   │   ├── index.txt
+│   │   │   ├── next.svg
+│   │   │   ├── track
+│   │   │   │   ├── index.html
+│   │   │   │   └── index.txt
+│   │   │   ├── vercel.svg
+│   │   │   └── window.svg
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   ├── postcss.config.mjs
+│   │   ├── public
+│   │   │   ├── .DS_Store
+│   │   │   ├── assets
+│   │   │   │   ├── .DS_Store
+│   │   │   │   ├── background.jpg
+│   │   │   │   ├── logo.svg
+│   │   │   │   ├── vid.mp4
+│   │   │   │   └── vid2.mp4
+│   │   │   ├── file.svg
+│   │   │   ├── globe.svg
+│   │   │   ├── next.svg
+│   │   │   ├── vercel.svg
+│   │   │   └── window.svg
+│   │   ├── README.md
+│   │   ├── tsconfig.json
+│   │   └── types
+│   │       └── global.d.ts
+│   └── declarations
+│       ├── blocktrace_backend
+│       │   ├── blocktrace_backend.did
+│       │   ├── blocktrace_backend.did.d.ts
+│       │   ├── blocktrace_backend.did.js
+│       │   ├── index.d.ts
+│       │   └── index.js
+│       ├── blocktrace_frontend
+│       │   ├── blocktrace_frontend.did
+│       │   ├── blocktrace_frontend.did.d.ts
+│       │   ├── blocktrace_frontend.did.js
+│       │   ├── index.d.ts
+│       │   └── index.js
+│       └── internet_identity
+│           ├── index.d.ts
+│           ├── index.js
+│           ├── internet_identity.did
+│           ├── internet_identity.did.d.ts
+│           └── internet_identity.did.js
+├── structure.txt
+└── tsconfig.json
+
+39 directories, 120 files

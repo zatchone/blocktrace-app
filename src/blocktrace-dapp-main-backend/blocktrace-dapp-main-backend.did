@@ -1,20 +1,17 @@
+type AddStepResult = variant { Ok : text; Err : text };
 type Step = record {
-  product_id: text;
-  actor_name: text;
-  role: text;
-  action: text;
-  location: text;
-  notes: opt text;
-  timestamp: nat64;
+  action : text;
+  product_id : text;
+  role : text;
+  notes : opt text;
+  timestamp : nat64;
+  location : text;
+  actor_name : text;
 };
-
-type AddStepResult = variant {
-  Ok: text;
-  Err: text;
-};
-
-service : {
-  add_step: (Step) -> (AddStepResult);
-  get_product_history: (text) -> (vec Step) query;
-  get_all_products: () -> (vec text) query;
+service : () -> {
+  add_step : (Step) -> (AddStepResult);
+  get_all_products : () -> (vec text) query;
+  get_canister_info : () -> (text) query;
+  get_product_history : (text) -> (vec Step) query;
+  get_total_steps_count : () -> (nat64) query;
 }

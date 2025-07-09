@@ -1,370 +1,317 @@
 "use client";
-import React, { useState } from "react";
-import { cn } from "@/lib/utils";
-import { useMotionTemplate, useMotionValue, motion } from "motion/react";
-import { Package, Truck, Factory, Store, MapPin, Calendar, FileText, CheckCircle } from "lucide-react";
-import Footer from "@/components/footer";
 
-// Input Component
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  className?: string;
-}
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Package,
+  Loader2,
+  CheckCircle,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { icpService } from "@/lib/icp-service";
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
-    const radius = 100;
-    const [visible, setVisible] = useState(false);
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
-      const { currentTarget, clientX, clientY } = event;
-      const { left, top } = currentTarget.getBoundingClientRect();
-      mouseX.set(clientX - left);
-      mouseY.set(clientY - top);
-    }
-
-    return (
-      <motion.div
-        style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
-              #22c55e,
-              transparent 80%
-            )
-          `,
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setVisible(true)}
-        onMouseLeave={() => setVisible(false)}
-        className="group/input rounded-lg p-[2px] transition duration-300"
-      >
-        <input
-          type={type}
-          className={cn(
-            `flex h-12 w-full rounded-md border-none bg-white/90 px-4 py-3 text-sm text-gray-800 transition duration-400 group-hover/input:shadow-none file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:ring-[2px] focus-visible:ring-green-500 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 shadow-[0px_1px_3px_rgba(0,0,0,0.1)]`,
-            className,
-          )}
-          ref={ref}
-          {...props}
-        />
-      </motion.div>
-    );
-  },
-);
-Input.displayName = "Input";
-
-// Timeline Event Interface
-interface TimelineEvent {
-  id: string;
+type TimelineEvent = {
+  id: number;
   actor: string;
   role: string;
   action: string;
-  date: string;
   location: string;
-  notes: string;
-  verified: boolean;
-}
-
-// API Response Interface
-interface ApiResponse {
-  success: boolean;
-  data?: {
-    product_id: string;
-    status: string;
-    timeline: TimelineEvent[];
-  };
-  error?: string;
-}
-
-// Role Icon Mapping
-const getRoleIcon = (role: string) => {
-  switch (role.toLowerCase()) {
-    case 'manufacturer':
-      return <Factory className="w-6 h-6" />;
-    case 'distributor':
-    case 'logistics provider':
-      return <Truck className="w-6 h-6" />;
-    case 'retailer':
-      return <Store className="w-6 h-6" />;
-    case 'warehouse':
-      return <Package className="w-6 h-6" />;
-    default:
-      return <Package className="w-6 h-6" />;
-  }
+  date: string;
+  notes?: string;
+  verified?: boolean;
 };
 
-// Timeline Event Card Component
-const TimelineCard = ({ event, index, isLast }: { event: TimelineEvent; index: number; isLast: boolean }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.2 }}
-      className="relative flex items-start space-x-4"
-    >
-      {/* Timeline Line and Icon */}
-      <div className="flex flex-col items-center">
-        <div className="bg-green-500 rounded-full p-3 shadow-lg border-4 border-green-400/30">
-          {getRoleIcon(event.role)}
-        </div>
-        {!isLast && (
-          <div className="w-px h-16 bg-gradient-to-b from-green-500 to-green-300 mt-2"></div>
-        )}
-      </div>
-
-      {/* Event Card */}
-      <motion.div
-        whileHover={{ scale: 1.02, boxShadow: "0 20px 25px -5px rgba(34, 197, 94, 0.3)" }}
-        className="flex-1 bg-gradient-to-br from-green-400 via-green-500 to-green-600 rounded-xl p-6 shadow-lg border border-green-300/20 mb-6"
-      >
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-lg font-bold text-black flex items-center space-x-2">
-              <span>{event.actor}</span>
-              {event.verified && (
-                <CheckCircle className="w-5 h-5 text-green-800" />
-              )}
-            </h3>
-            <p className="text-black/80 font-medium">{event.role}</p>
-          </div>
-          <div className="bg-black/20 px-3 py-1 rounded-full">
-            <span className="text-black text-sm font-medium">{event.action}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="flex items-center space-x-2 text-black/90">
-            <Calendar className="w-4 h-4" />
-            <span className="text-sm">{new Date(event.date).toLocaleString()}</span>
-          </div>
-          <div className="flex items-center space-x-2 text-black/90">
-            <MapPin className="w-4 h-4" />
-            <span className="text-sm">{event.location}</span>
-          </div>
-        </div>
-
-        {event.notes && (
-          <div className="flex items-start space-x-2 text-black/80">
-            <FileText className="w-4 h-4 mt-0.5" />
-            <p className="text-sm italic">{event.notes}</p>
-          </div>
-        )}
-
-        {event.verified && (
-          <div className="mt-4 flex items-center space-x-2">
-            <div className="bg-green-800/30 px-3 py-1 rounded-full">
-              <span className="text-black text-xs font-medium">✓ Blockchain Verified</span>
-            </div>
-          </div>
-        )}
-      </motion.div>
-    </motion.div>
-  );
-};
-
-// Main Track Product Component
-const TrackProductPage = () => {
-  const [productId, setProductId] = useState('');
+export default function TrackProductPage() {
+  const router = useRouter();
+  const [productId, setProductId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
-  const [error, setError] = useState('');
-  const [productStatus, setProductStatus] = useState('');
+  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+
+  // Connect to ICP
+  useEffect(() => {
+    (async () => {
+      setIsConnecting(true);
+      try {
+        const ok = await icpService.connect();
+        setIsConnected(ok);
+        if (!ok) setError("⚠️ Start your ICP canister first");
+      } catch (e: any) {
+        setError(`⚠️ ICP error: ${e.message}`);
+      } finally {
+        setIsConnecting(false);
+      }
+    })();
+  }, []);
 
   const handleTrack = async () => {
     if (!productId.trim()) {
-      setError('Please enter a Product ID');
+      setError("❗ Enter a Product ID");
       return;
     }
-
-    setIsLoading(true);
-    setError('');
+    setError("");
+    setStatus("");
     setTimeline([]);
-    setProductStatus('');
-    
+    setIsLoading(true);
+
     try {
-      // Make actual API call to your backend
-      const response = await fetch(`/api/track/${encodeURIComponent(productId.trim())}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: ApiResponse = await response.json();
-      
-      if (data.success && data.data) {
-        // Set the actual data from API response
-        setTimeline(data.data.timeline);
-        setProductStatus(data.data.status);
+      const steps = await icpService.getProductHistory(productId.trim());
+      if (steps.length === 0) {
+        setError("🔍 No history found");
       } else {
-        setError(data.error || 'Product not found. Please check the Product ID.');
-        setTimeline([]);
-        setProductStatus('');
+        const tl = steps.map((s, i) => ({
+          id: i,
+          actor: s.actor_name,
+          role: s.role,
+          action: s.action,
+          location: s.location,
+          date: new Date(Number(s.timestamp) / 1e6).toLocaleString(),
+          notes:
+            Array.isArray(s.notes) && s.notes.length > 0 ? s.notes[0] : undefined,
+          verified: true,
+        }));
+        setTimeline(tl);
+        setStatus(steps[steps.length - 1].action);
       }
-    } catch (error) {
-      console.error('Error tracking product:', error);
-      setError('Failed to fetch product information. Please try again.');
-      setTimeline([]);
-      setProductStatus('');
+    } catch (e) {
+      console.error(e);
+      setError("❌ Failed to fetch history");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'delivered':
-        return 'text-green-400 bg-green-900/30 border-green-400/30';
-      case 'in transit':
-        return 'text-yellow-400 bg-yellow-900/30 border-yellow-400/30';
-      case 'delayed':
-        return 'text-red-400 bg-red-900/30 border-red-400/30';
-      default:
-        return 'text-blue-400 bg-blue-900/30 border-blue-400/30';
-    }
-  };
+  // auto‑dismiss error
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(""), 5000);
+    return () => clearTimeout(t);
+  }, [error]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex flex-col">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-32 w-80 h-80 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-green-400/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+    <div className="relative min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 bg-fixed text-white">
+      {/* Grid + particles */}
+      <div className="fixed inset-0 pointer-events-none">
+        {[...Array(50)].map((_, i) => {
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+          const s = Math.random() * 4 + 2;
+          const o = Math.random() * 0.5 + 0.2;
+          return (
+            <div
+              key={i}
+              className="absolute bg-gradient-to-r from-cyan-400 to-purple-400 rounded-full animate-float"
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                width: `${s}px`,
+                height: `${s}px`,
+                opacity: o,
+                animationDuration: `${6 + Math.random()}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+      <div className="fixed inset-0 opacity-10">
+        <svg className="w-full h-full">
+          <defs>
+            <pattern
+              id="grid"
+              width="100"
+              height="100"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M100 0 L0 0 0 100"
+                fill="none"
+                stroke="url(#grid-grad)"
+                strokeWidth="1"
+              />
+            </pattern>
+            <linearGradient id="grid-grad">
+              <stop offset="0%" stopColor="#8B5CF6" />
+              <stop offset="100%" stopColor="#06B6D4" />
+            </linearGradient>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
       </div>
 
-      {/* Main content */}
-      <div className="flex-grow relative z-10 p-4">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-8"
+      {/* Toasts */}
+      {error && (
+        <div className="fixed top-8 right-8 bg-red-500 px-6 py-3 rounded-xl shadow-[0_0_15px_rgba(255,0,0,0.5)] z-50 animate-fade-in">
+          {error}
+        </div>
+      )}
+
+      {/* Back & Connection */}
+      <div className="relative z-10 flex items-center justify-between px-6 py-4">
+        <button
+          onClick={() => router.push("/")}
+          className="text-gray-300 hover:text-white transition"
+        >
+          ← Home
+        </button>
+        <div className="inline-flex items-center gap-2 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full border border-cyan-500/30">
+          {isConnecting ? (
+            <Loader2 className="w-5 h-5 animate-spin text-yellow-300" />
+          ) : isConnected ? (
+            <Wifi className="w-5 h-5 text-green-400" />
+          ) : (
+            <WifiOff className="w-5 h-5 text-red-400" />
+          )}
+          <span
+            className={`text-sm ${
+              isConnecting
+                ? "text-yellow-300"
+                : isConnected
+                ? "text-green-400"
+                : "text-red-400"
+            }`}
           >
-            <h1 className="text-4xl font-bold text-white mb-2">Track Your Product</h1>
-            <p className="text-gray-400">Enter a Product ID to view its complete supply chain journey</p>
-          </motion.div>
-
-          {/* Search Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-green-400 via-green-500 to-green-600 rounded-2xl p-8 mb-8 shadow-2xl border border-green-300/20"
-          >
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <Input
-                  type="text"
-                  value={productId}
-                  onChange={(e) => setProductId(e.target.value)}
-                  placeholder="Enter Product ID (e.g., PROD123456)"
-                  onKeyPress={(e) => e.key === 'Enter' && handleTrack()}
-                />
-              </div>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleTrack}
-                disabled={isLoading}
-                className="px-8 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl border border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Tracking...</span>
-                  </div>
-                ) : (
-                  'Track Product'
-                )}
-              </motion.button>
-            </div>
-          </motion.div>
-
-          {/* Error Message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 mb-8 text-red-400"
-            >
-              {error}
-            </motion.div>
-          )}
-
-          {/* Product Status Badge */}
-          {productStatus && timeline.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex justify-center mb-8"
-            >
-              <div className={`px-6 py-2 rounded-full border ${getStatusColor(productStatus)} font-medium`}>
-                Status: {productStatus}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Timeline */}
-          {timeline.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-4"
-            >
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">Supply Chain Journey</h2>
-              
-              <div className="max-w-3xl mx-auto">
-                {timeline.map((event, index) => (
-                  <TimelineCard
-                    key={event.id}
-                    event={event}
-                    index={index}
-                    isLast={index === timeline.length - 1}
-                  />
-                ))}
-              </div>
-
-              {/* Export Options */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className="flex justify-center mt-8"
-              >
-                <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2">
-                  <FileText className="w-4 h-4" />
-                  <span>Export Journey</span>
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-
-          {/* Empty State */}
-          {!isLoading && timeline.length === 0 && !error && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16"
-            >
-              <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg">Enter a Product ID to start tracking</p>
-            </motion.div>
-          )}
+            {isConnecting
+              ? "Connecting…"
+              : isConnected
+              ? "Connected"
+              : "Offline"}
+          </span>
         </div>
       </div>
 
-      {/* Footer */}
-      <Footer />
+      {/* Form Card */}
+      <main className="relative z-10 flex flex-col items-center px-6 py-16">
+        <div className="relative p-[2px] rounded-3xl bg-gradient-to-r from-purple-500 to-cyan-400 shadow-[0_0_30px_rgba(128,0,255,0.6)] max-w-lg w-full">
+          <div className="bg-black/50 backdrop-blur-md rounded-3xl p-8 space-y-6">
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-cyan-300 text-center">
+              Track a Product
+            </h1>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={productId}
+                onChange={(e) => setProductId(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleTrack()}
+                placeholder="Product ID…"
+                className="flex-1 bg-black/70 px-4 py-3 rounded-lg border border-gray-700 focus:border-purple-300 focus:ring-2 focus:ring-purple-300 transition"
+              />
+              <button
+                onClick={handleTrack}
+                disabled={isLoading || !isConnected}
+                className={`
+                  px-4 py-3 rounded-lg font-semibold text-black
+                  ${
+                    isLoading || !isConnected
+                      ? "bg-gray-800 cursor-not-allowed"
+                      : "bg-gradient-to-r from-purple-400 to-cyan-300 hover:scale-105"
+                  }
+                  transition shadow-[0_0_15px_rgba(128,0,255,0.6)]
+                `}
+              >
+                {isLoading ? <Loader2 className="animate-spin" /> : "Track"}
+              </button>
+            </div>
+            {status && (
+              <div className="text-center">
+                <p className="text-lg">
+                  Status:{" "}
+                  <span className="font-semibold text-purple-300">{status}</span>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Timeline */}
+      {timeline.length > 0 && (
+        <section className="relative z-10 max-w-2xl mx-auto space-y-6 px-6 pb-16">
+          <div className="absolute left-1/2 transform -translate-x-1/2 top-0 h-full w-1 bg-gradient-to-b from-purple-500 to-cyan-400 opacity-30" />
+          {timeline.map((evt) => (
+            <div key={evt.id} className="relative pl-6 animate-fade-in-up">
+              <div className="absolute left-1/2 transform -translate-x-1/2 top-6 w-4 h-4 rounded-full bg-gradient-to-r from-purple-400 to-cyan-300 shadow-[0_0_8px_rgba(128,0,255,0.6)]" />
+              <div className="relative p-[2px] rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-400 shadow-[0_0_20px_rgba(128,0,255,0.6)]">
+                <div className="bg-black/50 backdrop-blur-sm rounded-2xl p-6 space-y-3">
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="font-semibold text-white">{evt.actor}</p>
+                      <p className="text-sm text-gray-400">{evt.role}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-black">{evt.date}</p>
+                      {evt.verified && (
+                        <p className="mt-1 text-green-400 text-sm flex items-center gap-1">
+                          <CheckCircle className="w-4 h-4" /> Verified
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <p className="font-bold text-purple-300">{evt.action}</p>
+                  <p className="text-sm text-gray-400">📍 {evt.location}</p>
+                  {evt.notes && (
+                    <p className="mt-2 text-sm italic text-gray-200 bg-black/30 p-2 rounded">
+                      💬 {evt.notes}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Placeholder */}
+      {!isLoading && timeline.length === 0 && !error && (
+        <div className="relative z-10 text-center text-gray-300 px-6 mb-16">
+          <Package className="mx-auto mb-4" size={64} />
+          <p>Enter a Product ID to see its journey through the chain.</p>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0) rotate(0);
+          }
+          50% {
+            transform: translateY(-20px) rotate(180deg);
+          }
+        }
+        @keyframes gradient-x {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 15s ease infinite;
+        }
+        .animate-float {
+          animation: float 8s ease-in-out infinite;
+        }
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out both;
+        }
+      `}</style>
     </div>
   );
-};
-
-export default TrackProductPage;
+}

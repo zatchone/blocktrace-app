@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true
   },
+
+  
+  
   // Disable server-side features that don't work with static export
   eslint: {
     ignoreDuringBuilds: true,
