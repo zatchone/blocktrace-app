@@ -1,0 +1,31 @@
+type ESGScore = record {
+  product_id : text;
+  sustainability_score : nat8;
+  carbon_footprint_kg : float64;
+  total_distance_km : float64;
+  total_steps : nat32;
+  impact_message : text;
+  co2_saved_vs_traditional : float64;
+};
+
+type AddStepResult = variant { Ok : text; Err : text };
+type Step = record {
+  action : text;
+  product_id : text;
+  role : text;
+  notes : opt text;
+  timestamp : nat64;
+  location : text;
+  actor_name : text;
+  status : opt text; // status is now optional
+};
+
+service : () -> {
+  add_step : (Step) -> (AddStepResult);
+  get_all_products : () -> (vec text) query;
+  get_canister_info : () -> (text) query;
+  get_product_history : (text) -> (vec Step) query;
+  get_total_steps_count : () -> (nat64) query;
+  calculate_esg_score : (text) -> (opt ESGScore) query;
+  get_all_esg_scores : () -> (vec ESGScore) query;
+}

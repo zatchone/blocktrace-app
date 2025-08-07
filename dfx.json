@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "canisters": {
+    "blocktrace_backend": {
+      "type": "rust",
+      "package": "blocktrace-dapp-main-backend",
+      "candid": "src/blocktrace-dapp-main-backend/blocktrace-dapp-main-backend.did"
+    },
+    "blocktrace_frontend": {
+      "type": "assets",
+      "source": ["src/blocktrace-frontend-main/out"],
+      "dependencies": ["blocktrace_backend"]
+    },
+    "internet_identity": {
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8081",
+      "type": "ephemeral"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "",
+      "args": ""
+    }
+  },
+  "output_env_file": ".env"
+}
