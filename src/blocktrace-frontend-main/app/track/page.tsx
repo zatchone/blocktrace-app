@@ -571,7 +571,8 @@ export default function EnhancedTrackProductPage() {
                         let foundTokenId = null;
                         
                         // Check simple NFTs one by one (avoid payload size limit)
-                        for (let i = 1; i <= 20; i++) {
+                        // NOTE: Backend starts NFT IDs from 0, not 1
+                        for (let i = 0; i <= 20; i++) {
                           try {
                             const metadata = await nftClient.getMetadataSimple(BigInt(i));
                             if (metadata && metadata.product_name === productId.trim()) {
@@ -584,8 +585,8 @@ export default function EnhancedTrackProductPage() {
                         }
                         
                         // Check passport entries if no simple NFT found
-                        if (!foundTokenId) {
-                          for (let i = 1; i <= 20; i++) {
+                        if (foundTokenId === null) {
+                          for (let i = 0; i <= 20; i++) {
                             try {
                               const passport = await nftClient.getPassport(BigInt(i));
                               if (passport) {
@@ -601,12 +602,12 @@ export default function EnhancedTrackProductPage() {
                           }
                         }
                         
-                        if (!foundTokenId) {
+                        if (foundTokenId === null) {
                           alert(`No NFT found for product "${productId.trim()}". Make sure you created an NFT when adding the product step.`);
                           return;
                         }
                         
-                        router.push(`/nft?tokenId=${foundTokenId}`);
+                        router.push(`/passport?tokenId=${foundTokenId}`);
                       } catch (e) {
                         console.error('Failed to find NFT:', e);
                         alert('Error finding NFT: ' + e.message);

@@ -39,10 +39,41 @@ function PassportPage() {
           return;
         }
         const id = BigInt(tokenParamRaw);
-        const res = await nftClient.getPassport(id);
+        
+        console.log(`🔍 Looking for NFT/Passport with ID: ${id}`);
+        
+        // First try to get passport entry
+        let res = await nftClient.getPassport(id);
+        console.log(`📋 Passport result for ID ${id}:`, res ? 'Found' : 'Not found');
+        
+        // If no passport found, try simple NFT metadata
         if (!res) {
+          try {
+            console.log(`🎫 Trying simple NFT for ID ${id}...`);
+            const metadata = await nftClient.getMetadataSimple(id);
+            console.log(`🎫 Simple NFT result for ID ${id}:`, metadata ? 'Found' : 'Not found');
+            if (metadata) {
+              // Convert simple NFT metadata to passport format
+              res = JSON.stringify(metadata);
+              console.log(`✅ Converted simple NFT to passport format for ID ${id}`);
+            }
+          } catch (e) {
+            console.log(`❌ No simple NFT found for ID ${id}:`, e);
+          }
+        }
+        
+        if (!res) {
+          console.log(`❌ No NFT or passport found for ID ${id}`);
+          // For debugging: let's check what NFTs actually exist
+          try {
+            const allNfts = await nftClient.getAllNftsSimple();
+            console.log('📊 All existing NFTs:', allNfts.map(([id, meta]) => ({ id: id.toString(), product: meta.product_name })));
+          } catch (e) {
+            console.log('Failed to get all NFTs:', e);
+          }
           setJsonStr(null);
         } else {
+          console.log(`✅ Found data for ID ${id}`);
           setJsonStr(res);
           // Get real ESG score from ICP backend
           try {

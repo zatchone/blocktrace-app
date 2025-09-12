@@ -324,6 +324,10 @@ export default function AddStepPage() {
             
             console.log('📝 Creating NFT for product:', formData.productId.trim());
             
+            // Connect to NFT service first
+            await nftClient.connect();
+            console.log('✅ Connected to NFT service');
+            
             console.log('📝 NFT Metadata:', {
               product_name: nftMetadata.product_name,
               batch_id: nftMetadata.batch_id,
@@ -335,17 +339,32 @@ export default function AddStepPage() {
             });
             
             // First try minting with simple metadata structure
+            console.log('🎯 Attempting to mint simple NFT...');
             const tokenId = await nftClient.mintSimple(nftMetadata);
-            console.log('Minted NFT with tokenId:', tokenId.toString());
+            console.log('✅ Minted NFT with tokenId:', tokenId.toString());
             
             // Also create passport entry for compatibility
+            console.log('🎯 Attempting to create passport entry...');
             const passportData = JSON.stringify(nftMetadata);
             const passportId = await nftClient.mintPassport(passportData);
-            console.log('Created passport with ID:', passportId.toString());
+            console.log('✅ Created passport with ID:', passportId.toString());
+            
+            // Verify the NFT was created successfully
+            console.log('🔍 Verifying NFT creation...');
+            const verifyMetadata = await nftClient.getMetadataSimple(tokenId);
+            console.log('🔍 Verification result:', verifyMetadata ? 'SUCCESS' : 'FAILED');
+            if (verifyMetadata) {
+              console.log('🔍 Verified product name:', verifyMetadata.product_name);
+            }
             
             successMsg = `✅ Step added to blockchain! NFT Digital Passport created with ID: ${tokenId.toString()}`;
           } catch (mintErr) {
-            console.error("NFT mint failed:", mintErr);
+            console.error("❌ NFT mint failed:", mintErr);
+            console.error("❌ Full error details:", {
+              message: (mintErr as Error).message,
+              stack: (mintErr as Error).stack,
+              name: (mintErr as Error).name
+            });
             successMsg = "✅ Step successfully added to blockchain! (NFT minting failed - " + (mintErr as Error).message + ")";
           }
         }
