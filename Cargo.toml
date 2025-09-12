@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "src/blocktrace-dapp-main-backend"
+    , "src/nft-backend"
+]
+resolver = "2"

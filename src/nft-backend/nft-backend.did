@@ -1,0 +1,63 @@
+type Principal = principal;
+
+type MutableFlags = record {
+  transferable: bool;
+  allow_history_append_by_roles: vec text;
+};
+
+type HistoryEvent = record {
+  timestamp_nanos: nat64;
+  event: text;
+  actor: Principal;
+};
+
+type Metadata = record {
+  product_name: text;
+  batch_id: text;
+  manufacturer: Principal;
+  issue_date: nat64;
+  certificates: vec text;
+  image_uri: text;
+  image_hash: text;
+  history: vec HistoryEvent;
+  mutable_flags: MutableFlags;
+};
+
+type SimpleMetadata = record {
+  product_name: text;
+  batch_id: text;
+  manufacturer: text;
+  image_uri: text;
+  certificate_uri: text;
+  history: vec text;
+};
+
+type MintArgs = record {
+  metadata: Metadata;
+  owner_principal: Principal;
+};
+
+service : {
+  mint_nft: (MintArgs) -> (variant { Ok: nat64; Err: text });
+  get_metadata: (nat64) -> (opt Metadata) query;
+  transfer: (nat64, Principal) -> (variant { Ok: null; Err: text });
+  append_history: (nat64, text) -> (variant { Ok: null; Err: text });
+  owner_of: (nat64) -> (opt Principal) query;
+  set_role: (Principal, text) -> (variant { Ok: null; Err: text });
+  add_manufacturer: (Principal) -> (variant { Ok: null; Err: text });
+  get_manufacturers: () -> (vec Principal) query;
+  get_roles: () -> (vec record { Principal; text }) query;
+  list_tokens: () -> (vec nat64) query;
+  get_all_nfts: () -> (vec record { nat64; Metadata }) query;
+  
+  // Simple API methods
+  mint_nft_simple: (SimpleMetadata) -> (nat64);
+  get_metadata_simple: (nat64) -> (opt SimpleMetadata) query;
+  get_all_nfts_simple: () -> (vec record { nat64; SimpleMetadata }) query;
+  
+  // Passport API methods
+  mint_passport: (text) -> (nat64);
+  get_passport: (nat64) -> (opt text) query;
+}
+
+
