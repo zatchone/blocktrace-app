@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { nftClient } from "@/lib/nft-service";
+import { generatePassportPDF } from "@/lib/pdf-utils";
+import { icpService } from "@/lib/icp-service";
+import { Download, Award } from "lucide-react";
 
 function PassportPage() {
   const router = useRouter();
@@ -11,6 +14,9 @@ function PassportPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [imageError, setImageError] = useState(false);
+  const [esgScore, setEsgScore] = useState<number | null>(null);
+  const [esgStatus, setEsgStatus] = useState<'sustainable' | 'needs-improvement' | null>(null);
+  const [esgData, setEsgData] = useState<any>(null);
 
   useEffect(() => {
     // Get tokenId from URL on client side
@@ -38,6 +44,21 @@ function PassportPage() {
           setJsonStr(null);
         } else {
           setJsonStr(res);
+          // Get real ESG score from ICP backend
+          try {
+            const parsedData = JSON.parse(res);
+            if (parsedData.product_name) {
+              await icpService.connect();
+              const esgResult = await icpService.calculateESGScore(parsedData.product_name);
+              if (esgResult) {
+                setEsgScore(esgResult.sustainability_score);
+                setEsgStatus(esgResult.sustainability_score >= 70 ? 'sustainable' : 'needs-improvement');
+                setEsgData(esgResult);
+              }
+            }
+          } catch (esgError) {
+            console.error('Failed to fetch ESG score:', esgError);
+          }
         }
       } catch (e: any) {
         console.error('Passport load error:', e);
@@ -99,14 +120,66 @@ function PassportPage() {
   const imageSrc = imageGate.url;
   const certHref = certGate.url;
 
+  const handleDownloadPDF = () => {
+    generatePassportPDF({
+      tokenId: tokenParamRaw,
+      product_name: data?.product_name,
+      batch_id: data?.batch_id,
+      manufacturer: data?.manufacturer,
+      esgScore: esgScore || undefined,
+      esgStatus: esgStatus || undefined,
+      esgData: esgData
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white p-6">
       <div className="max-w-3xl mx-auto space-y-6">
-        <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-cyan-300">Digital Passport #{tokenParamRaw}</h1>
-        <div className="bg-black/40 backdrop-blur-md rounded-xl p-6 border border-purple-500/30 space-y-2">
-          <p><span className="text-gray-400">Product:</span> {data?.product_name || '-'}</p>
-          <p><span className="text-gray-400">Batch:</span> {data?.batch_id || '-'}</p>
-          <p><span className="text-gray-400">Manufacturer:</span> {data?.manufacturer || '-'}</p>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-cyan-300">Digital Passport #{tokenParamRaw}</h1>
+          <button
+            onClick={handleDownloadPDF}
+            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl font-bold text-white transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-2xl"
+          >
+            <Download className="w-5 h-5" />
+            <span>Download Certificate</span>
+          </button>
+        </div>
+        <div className="bg-black/40 backdrop-blur-md rounded-xl p-6 border border-purple-500/30 space-y-4">
+          <div className="space-y-2">
+            <p><span className="text-gray-400">Product:</span> {data?.product_name || '-'}</p>
+            <p><span className="text-gray-400">Batch:</span> {data?.batch_id || '-'}</p>
+            <p><span className="text-gray-400">Manufacturer:</span> {data?.manufacturer || '-'}</p>
+          </div>
+          
+          {/* ESG Badge */}
+          {esgScore !== null && esgData && (
+            <div className="border-t border-purple-500/30 pt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Award className="w-6 h-6 text-yellow-400" />
+                  <div>
+                    <p className="text-gray-400 text-sm">ESG Sustainability Score</p>
+                    <div className="flex items-center space-x-3 mt-1">
+                      <div className={`px-3 py-1 rounded-full text-sm font-bold ${
+                        esgStatus === 'sustainable' 
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30' 
+                          : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      }`}>
+                        {esgStatus === 'sustainable' ? '✓ Sustainable' : '⚠ Needs Improvement'}
+                      </div>
+                      <span className="text-white font-bold text-lg">{esgScore}/100</span>
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400 space-y-1">
+                      <p>Carbon Footprint: {esgData.carbon_footprint_kg.toFixed(2)} kg CO₂</p>
+                      <p>Distance: {esgData.total_distance_km.toFixed(0)} km</p>
+                      <p>CO₂ Saved: {esgData.co2_saved_vs_traditional.toFixed(2)} kg vs traditional</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           {imageSrc && !imageError && (
             <div>
               <p className="text-gray-400">Product Image</p>

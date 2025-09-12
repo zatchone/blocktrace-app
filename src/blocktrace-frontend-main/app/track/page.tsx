@@ -227,23 +227,90 @@ export default function EnhancedTrackProductPage() {
     };
   }, [timeline]);
 
-  const handleExportEnhancedPDF = () => {
+  const handleExportEnhancedPDF = async () => {
     const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("🔗 Enhanced Blockchain Supply Chain Report", 14, 20);
-    doc.setFontSize(12);
-    doc.text(`Product ID: ${productId}`, 14, 30);
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 38);
     
-    if (enhancedSummaryStats) {
-      doc.text(`Total Distance: ${enhancedSummaryStats.totalDistance} km`, 14, 46);
-      doc.text(`Carbon Footprint: ${enhancedSummaryStats.totalCarbon} kg CO₂`, 14, 54);
-      doc.text(`Total Cost: $${enhancedSummaryStats.totalCost}`, 14, 62);
-      doc.text(`Sustainability Score: ${enhancedSummaryStats.sustainabilityScore}/100`, 14, 70);
+    // Header with BlockTrace branding
+    doc.setFillColor(75, 0, 130);
+    doc.rect(0, 0, 210, 40, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('BLOCKTRACE', 14, 25);
+    doc.setFontSize(12);
+    doc.text('Enhanced Blockchain Supply Chain Report', 14, 35);
+    
+    // Product info
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SUPPLY CHAIN CERTIFICATE', 105, 55, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Product ID: ${productId}`, 14, 70);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 78);
+    
+    // Get real ESG score from ICP backend
+    let realESGScore = null;
+    try {
+      realESGScore = await icpService.calculateESGScore(productId);
+    } catch (error) {
+      console.error('Failed to get ESG score for PDF:', error);
+    }
+    
+    if (realESGScore) {
+      // Real ESG Badge from ICP backend
+      const esgScore = realESGScore.sustainability_score;
+      const badgeColor = esgScore >= 70 ? [34, 197, 94] : [239, 68, 68];
+      doc.setFillColor(badgeColor[0], badgeColor[1], badgeColor[2]);
+      doc.roundedRect(14, 85, 70, 15, 3, 3, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      const badgeText = esgScore >= 70 ? '✓ Sustainable' : '⚠ Needs Improvement';
+      doc.text(badgeText, 49, 95, { align: 'center' });
+      
+      // Real ESG Metrics from ICP
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(12);
+      doc.text(`ESG Score: ${esgScore}/100`, 90, 95);
+      doc.text(`Total Distance: ${realESGScore.total_distance_km.toFixed(0)} km`, 14, 110);
+      doc.text(`Carbon Footprint: ${realESGScore.carbon_footprint_kg.toFixed(2)} kg CO₂`, 14, 118);
+      doc.text(`CO₂ Saved vs Traditional: ${realESGScore.co2_saved_vs_traditional.toFixed(2)} kg`, 14, 126);
+      doc.text(`Supply Chain Steps: ${realESGScore.total_steps}`, 14, 134);
+      
+      // Impact message
+      if (realESGScore.impact_message) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`Impact: ${realESGScore.impact_message}`, 14, 142);
+      }
+    } else if (enhancedSummaryStats) {
+      // Fallback to calculated stats if ESG service unavailable
+      const esgScore = enhancedSummaryStats.sustainabilityScore;
+      const badgeColor = esgScore >= 70 ? [34, 197, 94] : [239, 68, 68];
+      doc.setFillColor(badgeColor[0], badgeColor[1], badgeColor[2]);
+      doc.roundedRect(14, 85, 60, 15, 3, 3, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      const badgeText = esgScore >= 70 ? '✓ Sustainable' : '⚠ Needs Improvement';
+      doc.text(badgeText, 44, 95, { align: 'center' });
+      
+      // Fallback metrics
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(12);
+      doc.text(`ESG Score: ${esgScore}/100`, 80, 95);
+      doc.text(`Total Distance: ${enhancedSummaryStats.totalDistance} km`, 14, 110);
+      doc.text(`Carbon Footprint: ${enhancedSummaryStats.totalCarbon} kg CO₂`, 14, 118);
+      doc.text(`Total Cost: $${enhancedSummaryStats.totalCost}`, 14, 126);
     }
     
     autoTable(doc, {
-      startY: 80,
+      startY: realESGScore ? 155 : 135,
       head: [["Step", "Actor", "Role", "Action", "Location", "Transport", "Quality", "CO₂ (kg)", "Cost ($)", "Blockchain Hash"]],
       body: filteredTimeline.map((e, i) => [
         i + 1,
