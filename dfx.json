@@ -19,11 +19,21 @@
   "networks": {
     "local": {
       "bind": "127.0.0.1:8081",
-      "type": "ephemeral"
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "system"
+      }
     },
     "ic": {
       "providers": ["https://ic0.app"],
       "type": "persistent"
+    }
+  },
+  "output_env_file": ".env",
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
     }
   }
 }

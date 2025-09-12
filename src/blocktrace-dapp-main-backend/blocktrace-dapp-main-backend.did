@@ -1,4 +1,15 @@
 type AddStepResult = variant { Ok : text; Err : text };
+type CrossChainProof = record {
+  chain_signature : text;
+  product_id : text;
+  proof_hash : text;
+  timestamp : nat64;
+};
+type SupplierVerification = record {
+  last_updated : nat64;
+  supplier_id : text;
+  verification_status : text;
+};
 type ESGScore = record {
   co2_saved_vs_traditional : float64;
   total_steps : nat32;
@@ -35,9 +46,22 @@ type Step = record {
 service : () -> {
   add_step : (Step) -> (AddStepResult);
   calculate_esg_score : (text) -> (opt ESGScore) query;
+  cancel_esg_timer : (text) -> (variant { Err : text; Ok : text });
+  generate_cross_chain_proof : (text) -> (
+      variant { Err : text; Ok : CrossChainProof },
+    );
   get_all_esg_scores : () -> (vec ESGScore) query;
   get_all_products : () -> (vec text) query;
   get_canister_info : () -> (text) query;
+  get_cross_chain_proof : (text) -> (opt CrossChainProof) query;
   get_product_history : (text) -> (vec Step) query;
+  get_supplier_verification : (text) -> (opt SupplierVerification) query;
   get_total_steps_count : () -> (nat64) query;
+  schedule_esg_recalculation : (text, nat64) -> (
+      variant { Err : text; Ok : text },
+    );
+  verify_cross_chain_signature : (text, text) -> (bool) query;
+  verify_supplier_with_api : (text) -> (
+      variant { Err : text; Ok : SupplierVerification },
+    );
 }

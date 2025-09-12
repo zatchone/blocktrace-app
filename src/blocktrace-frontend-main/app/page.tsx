@@ -76,12 +76,12 @@ const LandingPage = () => {
             BLOCKTRACE
           </div>
           <div className="hidden md:flex space-x-8 text-gray-300">
-            <a href="#" className="hover:text-white transition-colors">Learn</a>
-            <a href="#" className="hover:text-white transition-colors">Build</a>
-            <a href="#" className="hover:text-white transition-colors">Ecosystem</a>
-            <a href="#" className="hover:text-white transition-colors">Bridge</a>
-            <a href="#" className="hover:text-white transition-colors">Tools</a>
-            <a href="#" className="hover:text-white transition-colors">Blog</a>
+            <button onClick={() => router.push('/about')} className="hover:text-white transition-colors">About</button>
+            <button onClick={() => router.push('/features')} className="hover:text-white transition-colors">Features</button>
+            <button onClick={() => router.push('/pricing')} className="hover:text-white transition-colors font-semibold">Pricing</button>
+            <button onClick={() => router.push('/demo')} className="hover:text-white transition-colors">Demo</button>
+            <button onClick={() => router.push('/roadmap')} className="hover:text-white transition-colors">Roadmap</button>
+            <button onClick={() => router.push('/contact')} className="hover:text-white transition-colors">Contact</button>
           </div>
         </div>
         <button className="bg-white text-black px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors">
@@ -217,7 +217,7 @@ const LandingPage = () => {
       {/* Footer */}
       <div className="relative z-10 py-8 px-6 lg:px-8 border-t border-gray-800">
         <div className="max-w-6xl mx-auto text-center text-gray-400">
-          <p>&copy; 2024 BlockTrace. Built with ❤️ on the Internet Computer Protocol.</p>
+          <p>&copy; 2025 BlockTrace. Built with ❤️ on the Internet Computer Protocol.</p>
         </div>
       </div>
     </div>
