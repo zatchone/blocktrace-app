@@ -1,0 +1,9 @@
+{
+  "blocktrace_backend": {
+    "ic": "s2wch-oiaaa-aaaam-qd4ga-cai"
+  },
+  "blocktrace_frontend": {
+    "ic": "s5xet-dqaaa-aaaam-qd4gq-cai"
+  },
+  "nft_backend": {}
+}

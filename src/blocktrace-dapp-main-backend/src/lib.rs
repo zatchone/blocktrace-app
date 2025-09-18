@@ -632,7 +632,7 @@ async fn get_or_create_ecdsa_key() -> Result<Vec<u8>, String> {
         derivation_path: vec![b"blocktrace".to_vec()],
         key_id: ic_cdk::api::management_canister::ecdsa::EcdsaKeyId {
             curve: ic_cdk::api::management_canister::ecdsa::EcdsaCurve::Secp256k1,
-            name: "test_key_1".to_string(), // Use "key_1" for mainnet
+            name: "key_1".to_string(), // Use "key_1" for mainnet
         },
     };
     
@@ -657,7 +657,7 @@ async fn sign_with_ecdsa(message_hash: Vec<u8>) -> Result<Vec<u8>, String> {
         derivation_path: vec![b"blocktrace".to_vec()],
         key_id: ic_cdk::api::management_canister::ecdsa::EcdsaKeyId {
             curve: ic_cdk::api::management_canister::ecdsa::EcdsaCurve::Secp256k1,
-            name: "test_key_1".to_string(), // Use "key_1" for mainnet
+            name: "key_1".to_string(), // Use "key_1" for mainnet
         },
     };
     

@@ -1,5 +1,22 @@
 # 🚀 BlockTrace - WCHL25 Submission
 
+## 🌐 **LIVE MAINNET DEPLOYMENT**
+- **🔗 Live App**: https://s5xet-dqaaa-aaaam-qd4gq-cai.icp0.io/
+- **🔧 Backend API**: https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=s2wch-oiaaa-aaaam-qd4ga-cai
+
+### ✅ **Working Features:**
+- Supply chain tracking with blockchain records
+- Real-time ESG scoring and carbon footprint calculation
+- HTTP outcalls, advanced timers, t-ECDSA integration
+- Professional analytics dashboard with PDF export
+- All 6 frontend pages with responsive design
+
+### ⚠️ **Known Limitation:**
+- **NFT Digital Passports**: Not deployed due to cycles constraints during hackathon
+- Core supply chain functionality is fully operational
+
+---
+
 **🏆 WCHL25 Hackathon Entry**  
 **Domain:** RWA – Real-World Assets  
 **Team:** Solo Developer  
@@ -362,10 +379,11 @@ dfx canister id blocktrace-dapp-main-backend
 dfx canister id nft-backend
 ```
 
-### **Mainnet Deployment** (Coming Soon)
-- **Supply Chain Canister**: `TBD - Deploying to mainnet`
-- **NFT Canister**: `TBD - Deploying to mainnet`
-- **Frontend**: `TBD - Deploying to ICP hosting`
+### **Mainnet Deployment** ✅ **LIVE**
+- **Supply Chain Canister**: `s2wch-oiaaa-aaaam-qd4ga-cai` ✅
+- **Frontend Canister**: `s5xet-dqaaa-aaaam-qd4gq-cai` ✅
+- **NFT Canister**: `Not deployed - cycles constraint` ⚠️
+- **Live Application**: https://s5xet-dqaaa-aaaam-qd4gq-cai.icp0.io/
 
 ---
 
