@@ -15,11 +15,9 @@
 - **NFT Digital Passports**: Not deployed due to cycles constraints during hackathon
 - Core supply chain functionality is fully operational
 
----
 
 **🏆 WCHL25 Hackathon Entry**  
 **Domain:** RWA – Real-World Assets  
-**Team:** Solo Developer  
 **Tagline:** Tamper-proof supply chain visibility with ESG scoring and consumer trust passports — all on the Internet Computer.
 
 ## 📋 Table of Contents
@@ -254,6 +252,93 @@ npm run dev
 - Dedicated account manager
 - SLA guarantees
 
+### **Revenue Projections:**
+- Year 1: $500K (50 enterprise customers)
+- Year 2: $2.5M (200 customers + transaction volume)
+- Year 3: $8M (500+ customers + marketplace effects)
+
+## 🚧 Technical Challenges
+
+### **WCHL25 Hackathon Challenges**
+
+**1. Multi-Canister State Synchronization**
+- **Challenge**: Keeping supply chain data and NFT metadata in sync across canisters
+- **Solution**: Implemented cross-canister communication with proper error handling
+- **Learning**: ICP's actor model requires careful state management design
+
+**2. Real-time ESG Calculations**
+- **Challenge**: Computing carbon footprint and sustainability scores efficiently on-chain
+- **Solution**: Optimized algorithms with caching and incremental updates
+- **Innovation**: Created industry-first real-time ESG scoring on blockchain
+
+**3. Advanced ICP Features Integration**
+- **Challenge**: Implementing HTTP outcalls, timers, and t-ECDSA simultaneously
+- **Solution**: Modular architecture with proper error handling and fallbacks
+- **Result**: Successfully integrated all 3 advanced ICP features in production
+
+**4. Large Canister Deployment**
+- **Challenge**: NFT canister required 500B+ cycles due to complex metadata structures
+- **Solution**: Learned optimal deployment strategies and cycle management
+- **Learning**: Complex canisters need significantly more cycles than basic ones
+
+**5. Frontend-Backend Integration**
+- **Challenge**: Connecting Next.js frontend to multiple ICP canisters on mainnet
+- **Solution**: Environment-based configuration with proper error handling
+- **Result**: Seamless mainnet deployment with live functionality
+
+## 🚀 Future Plans
+
+### **Post-WCHL25 Roadmap**
+
+**Phase 1: Complete NFT Integration (Q1 2025)**
+- Deploy NFT canister with sufficient cycles
+- Complete digital passport functionality
+- QR code scanning and verification
+
+**Phase 2: Enterprise Features (Q2 2025)**
+- IoT sensor integration for real-time data
+- Advanced analytics and reporting
+- Multi-signature verification workflows
+- Enterprise API development
+
+**Phase 3: Market Expansion (Q3 2025)**
+- Pilot programs with fashion and food companies
+- Regulatory compliance modules (EU taxonomy)
+- Multi-language support
+- Mobile application development
+
+**Phase 4: Advanced Blockchain Features (Q4 2025)**
+- Enhanced cross-chain integration
+- Carbon credit marketplace
+- AI-powered fraud detection
+- Global supply chain network effects
+
+**Long-term Vision (2026+)**
+- Open source SDK for developers
+- Global supply chain transparency standard
+- Integration with major ERP systems
+- Expansion to emerging markets
+
+**Starter Plan - $99/month**
+- Up to 1,000 products tracked
+- Basic ESG scoring
+- Standard PDF reports
+- Email support
+
+**Professional Plan - $299/month**
+- Up to 10,000 products tracked
+- Advanced analytics dashboard
+- Custom branding
+- API access
+- Priority support
+
+**Enterprise Plan - $999/month**
+- Unlimited products
+- White-label solutions
+- Custom integrations
+- Dedicated account manager
+- SLA guarantees
+
 ### **Transaction-Based Revenue**
 - $0.10 per supply chain step recorded
 - Premium verification services
@@ -384,6 +469,15 @@ dfx canister id nft-backend
 - **Frontend Canister**: `s5xet-dqaaa-aaaam-qd4gq-cai` ✅
 - **NFT Canister**: `Not deployed - cycles constraint` ⚠️
 - **Live Application**: https://s5xet-dqaaa-aaaam-qd4gq-cai.icp0.io/
+- **Backend API**: https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=s2wch-oiaaa-aaaam-qd4ga-cai
+
+### **Local Development**
+```bash
+# Get local canister IDs after deployment
+dfx canister id blocktrace_backend
+dfx canister id nft_backend
+dfx canister id blocktrace_frontend
+```
 
 ---
 
