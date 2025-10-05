@@ -1,0 +1,67 @@
+type AddStepResult = variant { Ok : text; Err : text };
+type CrossChainProof = record {
+  chain_signature : text;
+  product_id : text;
+  proof_hash : text;
+  timestamp : nat64;
+};
+type SupplierVerification = record {
+  last_updated : nat64;
+  supplier_id : text;
+  verification_status : text;
+};
+type ESGScore = record {
+  co2_saved_vs_traditional : float64;
+  total_steps : nat32;
+  product_id : text;
+  sustainability_score : nat8;
+  total_distance_km : float64;
+  carbon_footprint_kg : float64;
+  impact_message : text;
+};
+type Step = record {
+  batch_number : opt text;
+  status : opt text;
+  temperature_celsius : opt float64;
+  action : text;
+  cost_usd : opt float64;
+  product_id : text;
+  estimated_arrival : opt nat64;
+  role : text;
+  certification_hash : opt text;
+  quality_score : opt nat8;
+  blockchain_hash : opt text;
+  gps_latitude : opt float64;
+  humidity_percent : opt float64;
+  notes : opt text;
+  timestamp : nat64;
+  gps_longitude : opt float64;
+  actual_arrival : opt nat64;
+  carbon_footprint_kg : opt float64;
+  distance_km : opt float64;
+  location : text;
+  transport_mode : opt text;
+  actor_name : text;
+};
+service : () -> {
+  add_step : (Step) -> (AddStepResult);
+  calculate_esg_score : (text) -> (opt ESGScore) query;
+  cancel_esg_timer : (text) -> (variant { Err : text; Ok : text });
+  generate_cross_chain_proof : (text) -> (
+      variant { Err : text; Ok : CrossChainProof },
+    );
+  get_all_esg_scores : () -> (vec ESGScore) query;
+  get_all_products : () -> (vec text) query;
+  get_canister_info : () -> (text) query;
+  get_cross_chain_proof : (text) -> (opt CrossChainProof) query;
+  get_product_history : (text) -> (vec Step) query;
+  get_supplier_verification : (text) -> (opt SupplierVerification) query;
+  get_total_steps_count : () -> (nat64) query;
+  schedule_esg_recalculation : (text, nat64) -> (
+      variant { Err : text; Ok : text },
+    );
+  verify_cross_chain_signature : (text, text) -> (bool) query;
+  verify_supplier_with_api : (text) -> (
+      variant { Err : text; Ok : SupplierVerification },
+    );
+}
