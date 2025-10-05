@@ -207,22 +207,28 @@ dfx start --background --clean
 dfx deploy
 ```
 
-3. **Frontend Setup**
+3. **Install Dependencies**
 ```bash
+# Install root dependencies
+npm install
+
+# Install frontend dependencies
 cd src/blocktrace-frontend-main
+npm install
 
 # Copy environment file for local development
 cp .env.example .env.local
+```
 
-# Install dependencies and start
-npm install
+4. **Start Frontend**
+```bash
 npm run dev
 ```
 
-4. **Access Application**
+5. **Access Application**
 - **Frontend**: http://localhost:3000
-- **Supply Chain Canister**: `dfx canister id blocktrace-dapp-main-backend`
-- **NFT Canister**: `dfx canister id nft-backend`
+- **Supply Chain Canister**: `dfx canister id blocktrace_backend`
+- **NFT Canister**: `dfx canister id nft_backend`
 
 ### Demo Walkthrough
 1. **Add Supply Chain Step**: Navigate to `/add-step` → Fill product details → Enable NFT minting
